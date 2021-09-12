@@ -5,7 +5,7 @@ from pygame.locals import * # no "pygame.locals" prefix is needed
 import numpy as np
 
 from config import *
-import vector2 as Vector2
+from vector2 import Vector2
 
 def main():
     # Initialize program
@@ -19,6 +19,7 @@ def main():
 
     # Test
     #draw_shapes()
+    #vector_operations()
 
     P1 = Player()
 
@@ -97,6 +98,36 @@ def draw_shapes():
     pygame.draw.rect(DISPLAYSURF, RED, (100, 200, 100, 50), 2)
     pygame.draw.rect(DISPLAYSURF, WHITE, (110, 260, 80, 5))
     pygame.display.update()
+
+def vector_operations():
+    v1 = Vector2(2, 1)
+    v1.print('v1')
+    v2 = Vector2()
+    v2.print('v2')
+    v2.x, v2.y = 3, 3
+    v2.print('v2')
+    print()
+    print('v3 = v1 + v2')
+    v3 = v1 + v2
+    v3.print('v3')
+    print()
+    print('v3 -= (10, 10)')
+    v3 -= Vector2(10, 10)
+    v3.print('v3')
+    print()
+    print('v3 /= 2')
+    v3 /= 2
+    v3.print('v3')
+    print('v4 = v3 / 2')
+    v4 = v3 / 2
+    v4.print('v4')
+    print()
+    print('v5 = v4 * (-2)')
+    v5 = v4 * (-2)
+    v5.print()
+    print('v4 *= (-2)')
+    v4 *= (-2)
+    v4.print()
 
 if __name__ == "__main__": # If this section exists, this will be the entry point
     main()
