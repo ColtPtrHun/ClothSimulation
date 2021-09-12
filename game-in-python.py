@@ -3,18 +3,17 @@ __author__ = "Péter Kerekes"
 import pygame, sys
 from pygame.locals import * # no "pygame.locals" prefix is needed
 import numpy as np
-import random
 
 from config import *
 import vector2 as Vector2
-
-DISPLAYSURF = pygame.display.set_mode(SCREEN_SIZE)
 
 def main():
     # Initialize program
     pygame.init()
  
     # Setup display
+    global DISPLAYSURF # Create a global variable. If it already exists, then this is only required if we want to change its value.
+    DISPLAYSURF = pygame.display.set_mode(SCREEN_SIZE)
     DISPLAYSURF.fill(SCREEN_BACKGROUND)
     pygame.display.set_caption("Game In Python")
 
@@ -42,12 +41,15 @@ def main():
         pygame.display.update()
         pygame.time.Clock().tick(1 / dT)
 
+
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
-    speed = 4 # class (~static) variable
+    speed = 4 # Class (~static) variable
     colliderSize = (44, 96)
 
     def __init__(self):
-        self.moveDirection = np.array([0, 0]) # instance variable
+        #self.pos = Vector2()
+
+        self.moveDirection = np.array([0, 0])
 
         super().__init__() 
         self.image = pygame.image.load("Materials/Player.png")
@@ -77,8 +79,9 @@ class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Play
             self.moveDirection += np.array([1, 0])
 
     def move(self):
+        pass
         # Apply movement
-        self.rect.move_ip(Vector2.normalized(self.moveDirection) * Player.speed)
+        #self.rect.move_ip(Vector2.normalized(self.moveDirection) * Player.speed)
         
  
     def draw(self, surface):
@@ -93,6 +96,7 @@ def draw_shapes():
     pygame.draw.circle(DISPLAYSURF, WHITE, (200,50), 30)
     pygame.draw.rect(DISPLAYSURF, RED, (100, 200, 100, 50), 2)
     pygame.draw.rect(DISPLAYSURF, WHITE, (110, 260, 80, 5))
+    pygame.display.update()
 
 if __name__ == "__main__": # If this section exists, this will be the entry point
     main()
