@@ -6,6 +6,7 @@ import numpy as np # we can use aliases
 
 from config import *
 from vector2 import Vector2 # Vector2 class from vector2 module
+import random
 
 def main():
     init()
@@ -18,10 +19,10 @@ def init():
     # Setup display
     global display_surface # Create a global variable. If it already exists, then this is only required if we want to change its value.
     display_surface = pygame.display.set_mode(SCREEN_SIZE)
-    pygame.display.set_caption("Game In Python")
+    pygame.display.set_caption("Cloth simulation")
 
     global P1
-    P1 = Player()
+    P1 = Point()
 
     global clock
     clock = pygame.time.Clock()
@@ -33,17 +34,28 @@ def loop():
             sys.exit()
 
     # Physics
-    P1.input()
     P1.move()
 
     # Graphics
     display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
-    P1.draw(display_surface)
+    P1.draw()
     pygame.display.update()
 
     # Sleep
     clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
+class Point():
+    radius = 10
+    def __init__(self):
+        self.pos = Vector2(random.randrange(0, SCREEN_SIZE[0]), random.randrange(0, SCREEN_SIZE[1]))
+        self.vel = Vector2.zero()
+    
+    def move(self):
+        self.vel += Vector2.down() * g * dT
+        self.pos += self.vel * dT
+    
+    def draw(self):
+        pygame.draw.circle(display_surface, WHITE, (self.pos.x, self.pos.y), Point.radius)
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     # Class (~static) variables
@@ -54,7 +66,7 @@ class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Play
         # Instance variables
         self.pos = Vector2(.5 * SCREEN_SIZE[0], .5 * SCREEN_SIZE[1]) # move to center
 
-        super().__init__() 
+        super().__init__() # calls the init function in Sprite 
         self.image = pygame.image.load("Materials/Player.png")
         self.surf = pygame.Surface(Player.colliderSize) # create border
         self.rect = self.surf.get_rect()
