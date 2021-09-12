@@ -7,7 +7,12 @@ import numpy as np # we can use aliases
 from config import *
 from vector2 import Vector2 # Vector2 class from vector2 module
 
-def start():
+def main():
+    init()
+    while True:
+        loop()
+
+def init():
     pygame.init()
  
     # Setup display
@@ -15,33 +20,29 @@ def start():
     display_surface = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption("Game In Python")
 
-    # Test
-    #draw_shapes()
-    #vector_operations()
-
     global P1
     P1 = Player()
 
-def update():
+    global clock
     clock = pygame.time.Clock()
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
+def loop():
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
 
-        # Physics
-        P1.input()
-        P1.move()
+    # Physics
+    P1.input()
+    P1.move()
 
-        # Graphics
-        display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
-        P1.draw(display_surface)
-        pygame.display.update()
+    # Graphics
+    display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
+    P1.draw(display_surface)
+    pygame.display.update()
 
-        # Sleep
-        clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
+    # Sleep
+    clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
@@ -63,16 +64,16 @@ class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Play
         pressed_keys = pygame.key.get_pressed()
 
         # Summarize input (+ boundaries)
-        self.inputDir = Vector2.zeros()
+        self.inputDir = Vector2.zero()
         
         if pressed_keys[K_UP] and self.rect.top > 0:
-            self.inputDir -= Vector2(0, 1)
+            self.inputDir += Vector2.up()
         if pressed_keys[K_DOWN] and self.rect.bottom < SCREEN_SIZE[1]:
-            self.inputDir += Vector2(0, 1)
+            self.inputDir += Vector2.down()
         if pressed_keys[K_LEFT] and self.rect.left > 0:
-            self.inputDir -= Vector2(1, 0)
+            self.inputDir += Vector2.left()
         if pressed_keys[K_RIGHT] and self.rect.right < SCREEN_SIZE[0]:
-            self.inputDir += Vector2(1, 0)
+            self.inputDir += Vector2.right()
         
         self.pos += self.inputDir.normalized() * Player.speed * dT
 
@@ -84,7 +85,7 @@ class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Play
     def draw(self, surface):
         surface.blit(self.image, self.rect)     
 
-def draw_shapes():
+def test_shapes():
     display_surface.fill(SCREEN_BACKGROUND)
     
     pygame.draw.line(display_surface, BLUE, (150,130), (130,170))
@@ -97,7 +98,7 @@ def draw_shapes():
 
     pygame.display.update()
 
-def vector_operations():
+def test_vector2():
     v1 = Vector2(2, 1)
     v1.print('v1')
     v2 = Vector2()
@@ -126,7 +127,20 @@ def vector_operations():
     print('v4 *= (-2)')
     v4 *= (-2)
     v4.print()
+    print()
+    v7 = Vector2(-4.1, 3.2)
+    v8 = Vector2(-4.1, 3.2)
+    print('Distance between v7 and v8: ' + '{:.6f}'.format(Vector2.distance(v7, v8)))
+    if v7 == v8:
+        print('They are equal')
+    else:
+        print('They are different')
+    print()
+    print('v7 magnitude = ' + '{:.2f}'.format(v7.magnitude()))
+    v8 = v7.normalized()
+    v8.print('v8 = v7 normalized')
+    v8 *= v7.magnitude()
+    v8.print('v8 *= v7.magnitude')
 
 if __name__ == "__main__": # If this section exists, this will be the entry point
-    start()
-    update()
+    main()
