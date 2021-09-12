@@ -2,28 +2,29 @@ __author__ = "Péter Kerekes"
 
 import pygame, sys
 from pygame.locals import * # no "pygame.locals" prefix is needed
-import numpy as np
+import numpy as np # we can use aliases
 
 from config import *
-from vector2 import Vector2
+from vector2 import Vector2 # Vector2 class from vector2 module
 
-def main():
-    # Initialize program
+def start():
     pygame.init()
  
     # Setup display
-    global DISPLAYSURF # Create a global variable. If it already exists, then this is only required if we want to change its value.
-    DISPLAYSURF = pygame.display.set_mode(SCREEN_SIZE)
-    DISPLAYSURF.fill(SCREEN_BACKGROUND)
+    global display_surface # Create a global variable. If it already exists, then this is only required if we want to change its value.
+    display_surface = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption("Game In Python")
 
     # Test
     #draw_shapes()
     #vector_operations()
 
+    global P1
     P1 = Player()
 
-    # Game Loop
+def update():
+    clock = pygame.time.Clock()
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -34,69 +35,66 @@ def main():
         P1.input()
         P1.move()
 
-        # Draw
-        DISPLAYSURF.fill(SCREEN_BACKGROUND) # Clear the screen first
-        P1.draw(DISPLAYSURF)
-
-        # Update screen and wait
+        # Graphics
+        display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
+        P1.draw(display_surface)
         pygame.display.update()
-        pygame.time.Clock().tick(1 / dT)
+
+        # Sleep
+        clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
-    speed = 4 # Class (~static) variable
+    # Class (~static) variables
+    speed = 250
     colliderSize = (44, 96)
 
     def __init__(self):
-        #self.pos = Vector2()
-
-        self.moveDirection = np.array([0, 0])
+        # Instance variables
+        self.pos = Vector2(.5 * SCREEN_SIZE[0], .5 * SCREEN_SIZE[1]) # move to center
 
         super().__init__() 
         self.image = pygame.image.load("Materials/Player.png")
         self.surf = pygame.Surface(Player.colliderSize) # create border
         self.rect = self.surf.get_rect()
-
-        self.rect.move_ip(.5 * SCREEN_SIZE[1] + Player.colliderSize[0],
-                          .5 * SCREEN_SIZE[1] - .5 * Player.colliderSize[1]) # move to center
  
     def input(self):
         # Read input
         pressed_keys = pygame.key.get_pressed()
 
         # Summarize input (+ boundaries)
-        self.moveDirection = np.array([0, 0])
+        self.inputDir = Vector2.zeros()
         
         if pressed_keys[K_UP] and self.rect.top > 0:
-            self.moveDirection += np.array([0, -1])
-    
+            self.inputDir -= Vector2(0, 1)
         if pressed_keys[K_DOWN] and self.rect.bottom < SCREEN_SIZE[1]:
-            self.moveDirection += np.array([0, 1])
-        
+            self.inputDir += Vector2(0, 1)
         if pressed_keys[K_LEFT] and self.rect.left > 0:
-            self.moveDirection += np.array([-1, 0])
-
+            self.inputDir -= Vector2(1, 0)
         if pressed_keys[K_RIGHT] and self.rect.right < SCREEN_SIZE[0]:
-            self.moveDirection += np.array([1, 0])
+            self.inputDir += Vector2(1, 0)
+        
+        self.pos += self.inputDir.normalized() * Player.speed * dT
 
     def move(self):
-        pass
         # Apply movement
-        #self.rect.move_ip(Vector2.normalized(self.moveDirection) * Player.speed)
-        
+        self.rect.move_ip(self.pos.x - self.rect.center[0], self.pos.y - self.rect.center[1])
+        #self.rect.update(self.pos.x, self.pos.y, Player.colliderSize[0], Player.colliderSize[1])        
  
     def draw(self, surface):
         surface.blit(self.image, self.rect)     
 
 def draw_shapes():
-    # Creating Lines and Shapes
-    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (130,170))
-    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (170,170))
-    pygame.draw.line(DISPLAYSURF, GREEN, (130,170), (170,170))
-    pygame.draw.circle(DISPLAYSURF, WHITE, (100,50), 30)
-    pygame.draw.circle(DISPLAYSURF, WHITE, (200,50), 30)
-    pygame.draw.rect(DISPLAYSURF, RED, (100, 200, 100, 50), 2)
-    pygame.draw.rect(DISPLAYSURF, WHITE, (110, 260, 80, 5))
+    display_surface.fill(SCREEN_BACKGROUND)
+    
+    pygame.draw.line(display_surface, BLUE, (150,130), (130,170))
+    pygame.draw.line(display_surface, BLUE, (150,130), (170,170))
+    pygame.draw.line(display_surface, GREEN, (130,170), (170,170))
+    pygame.draw.circle(display_surface, WHITE, (100,50), 30)
+    pygame.draw.circle(display_surface, WHITE, (200,50), 30)
+    pygame.draw.rect(display_surface, RED, (100, 200, 100, 50), 2)
+    pygame.draw.rect(display_surface, WHITE, (110, 260, 80, 5))
+
     pygame.display.update()
 
 def vector_operations():
@@ -130,4 +128,5 @@ def vector_operations():
     v4.print()
 
 if __name__ == "__main__": # If this section exists, this will be the entry point
-    main()
+    start()
+    update()

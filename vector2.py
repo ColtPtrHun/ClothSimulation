@@ -34,7 +34,7 @@ class Vector2:
     def print(self, name='v'):
         print(name + ' = ({:.2f}'.format(self.x) + ', {:.2f}'.format(self.y) + ')')
 
-    def zero():
+    def zeros():
         return Vector2()
     
     def ones():
@@ -44,7 +44,7 @@ class Vector2:
         return np.sqrt(np.power(v.x, 2.) + np.power(v.y, 2.))
 
     def normalized(v):
-        len = v.magnitude
+        len = v.magnitude()
         if np.isclose(len, 0):
-            return Vector2.zero()
+            return Vector2.zeros()
         return v / len
