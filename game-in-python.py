@@ -1,45 +1,46 @@
+__author__ = "Péter Kerekes"
+
 import pygame, sys
 from pygame.locals import * # no "pygame.locals" prefix is needed
 import numpy as np
 import random
- 
-# Initialize program
-pygame.init()
 
-# Setting up color objects. Tuple: ordered, immutable collection of items
-BLUE  = (0, 0, 255)
-RED   = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-DARK_BLUE = (0, 0, 127)
+from config import *
+import vector2 as Vector2
 
-# Macros
-FPS = 60
-SCREEN_SIZE = (640, 480)
-SCREEN_BACKGROUND = DARK_BLUE
- 
-# Setup display
 DISPLAYSURF = pygame.display.set_mode(SCREEN_SIZE)
-DISPLAYSURF.fill(SCREEN_BACKGROUND)
-pygame.display.set_caption("Game In Python")
 
-def testShapes():
-    # Creating Lines and Shapes
-    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (130,170))
-    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (170,170))
-    pygame.draw.line(DISPLAYSURF, GREEN, (130,170), (170,170))
-    pygame.draw.circle(DISPLAYSURF, WHITE, (100,50), 30)
-    pygame.draw.circle(DISPLAYSURF, WHITE, (200,50), 30)
-    pygame.draw.rect(DISPLAYSURF, RED, (100, 200, 100, 50), 2)
-    pygame.draw.rect(DISPLAYSURF, WHITE, (110, 260, 80, 5))
-#testShapes()
+def main():
+    # Initialize program
+    pygame.init()
+ 
+    # Setup display
+    DISPLAYSURF.fill(SCREEN_BACKGROUND)
+    pygame.display.set_caption("Game In Python")
 
-def normalized(vector):
-    len = np.linalg.norm(vector)
-    if np.isclose(len, 0):
-        return np.array([0, 0])
-    return vector / len
+    # Test
+    #draw_shapes()
+
+    P1 = Player()
+
+    # Game Loop
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Physics
+        P1.input()
+        P1.move()
+
+        # Draw
+        DISPLAYSURF.fill(SCREEN_BACKGROUND) # Clear the screen first
+        P1.draw(DISPLAYSURF)
+
+        # Update screen and wait
+        pygame.display.update()
+        pygame.time.Clock().tick(1 / dT)
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     speed = 4 # class (~static) variable
@@ -77,30 +78,21 @@ class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Play
 
     def move(self):
         # Apply movement
-        self.rect.move_ip(normalized(self.moveDirection) * Player.speed)
+        self.rect.move_ip(Vector2.normalized(self.moveDirection) * Player.speed)
         
  
     def draw(self, surface):
         surface.blit(self.image, self.rect)     
 
-P1 = Player()
- 
-# Game Loop
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+def draw_shapes():
+    # Creating Lines and Shapes
+    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (130,170))
+    pygame.draw.line(DISPLAYSURF, BLUE, (150,130), (170,170))
+    pygame.draw.line(DISPLAYSURF, GREEN, (130,170), (170,170))
+    pygame.draw.circle(DISPLAYSURF, WHITE, (100,50), 30)
+    pygame.draw.circle(DISPLAYSURF, WHITE, (200,50), 30)
+    pygame.draw.rect(DISPLAYSURF, RED, (100, 200, 100, 50), 2)
+    pygame.draw.rect(DISPLAYSURF, WHITE, (110, 260, 80, 5))
 
-    # Physics
-    P1.input()
-    P1.move()
-
-    # Draw
-    DISPLAYSURF.fill(SCREEN_BACKGROUND) # Clear the screen first
-    P1.draw(DISPLAYSURF)
-
-    # Update screen and wait
-    pygame.display.update()
-    pygame.time.Clock().tick(FPS)
-
+if __name__ == "__main__": # If this section exists, this will be the entry point
+    main()
