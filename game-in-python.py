@@ -21,8 +21,20 @@ def init():
     display_surface = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption("Cloth simulation")
 
-    global P1
-    P1 = Point()
+    # Initialize points
+    global Points
+    Points = []
+
+    rows, columns = 6, 11
+    scale, offset = 2, 3
+
+    for y in range(rows):
+        for x in range(columns):
+            if y == 0 and x % 2 == 0: # lock every second point in the first row
+                Points.append(Point(offset + scale * x, offset + scale * y, True))
+            else:
+                #Points.append(Point())
+                Points.append(Point(offset + scale * x, offset + scale * y))
 
     global clock
     clock = pygame.time.Clock()
@@ -34,11 +46,18 @@ def loop():
             sys.exit()
 
     # Physics
-    P1.move()
+    for p in Points:
+        p.physics()
+    
+    for p in Points: # apply movement at the same time
+        p.move()
 
     # Graphics
     display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
-    P1.draw()
+
+    for p in Points:
+        p.draw()
+    
     pygame.display.update()
 
     # Sleep
@@ -46,16 +65,32 @@ def loop():
 
 class Point():
     radius = 10
-    def __init__(self):
-        self.pos = Vector2(random.randrange(0, SCREEN_SIZE[0]), random.randrange(0, SCREEN_SIZE[1]))
-        self.vel = Vector2.zero()
+    max_x, max_y = SCREEN_SIZE[0] / SCREEN_SCALE, SCREEN_SIZE[1] / SCREEN_SCALE
+    def __init__(self, x=None, y=None, locked=False):
+        if x == None or y == None:
+            self.pos = Vector2(x=random.random() * Point.max_x,
+                               y=random.random() * Point.max_y)
+        else:
+            self.pos = Vector2(x, y)
+        self.locked = locked
+        self.vel = self.delta = Vector2.zero()
+    
+    def physics(self):
+        if not self.locked:
+            self.vel += Vector2.down() * g * dT
+            self.delta = self.vel * dT
     
     def move(self):
-        self.vel += Vector2.down() * g * dT
-        self.pos += self.vel * dT
+        self.pos += self.delta
     
     def draw(self):
-        pygame.draw.circle(display_surface, WHITE, (self.pos.x, self.pos.y), Point.radius)
+        if not self.locked: color = WHITE
+        else: color = RED
+        
+        pygame.draw.circle(display_surface,
+                           color,
+                           (SCREEN_SCALE * self.pos.x, SCREEN_SCALE * self.pos.y),
+                           Point.radius)
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     # Class (~static) variables
