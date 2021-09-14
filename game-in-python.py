@@ -47,9 +47,6 @@ def loop():
 
     # Physics
     for p in Points:
-        p.physics()
-    
-    for p in Points: # apply movement at the same time
         p.move()
 
     # Graphics
@@ -68,20 +65,17 @@ class Point():
     max_x, max_y = SCREEN_SIZE[0] / SCREEN_SCALE, SCREEN_SIZE[1] / SCREEN_SCALE
     def __init__(self, x=None, y=None, locked=False):
         if x == None or y == None:
-            self.pos = Vector2(x=random.random() * Point.max_x,
-                               y=random.random() * Point.max_y)
+            self.pos = self.prev_pos = Vector2(x=random.random() * Point.max_x,
+                                               y=random.random() * Point.max_y)
         else:
-            self.pos = Vector2(x, y)
+            self.pos = self.prev_pos = Vector2(x, y)
         self.locked = locked
-        self.vel = self.delta = Vector2.zero()
-    
-    def physics(self):
-        if not self.locked:
-            self.vel += Vector2.down() * g * dT
-            self.delta = self.vel * dT
     
     def move(self):
-        self.pos += self.delta
+        if not self.locked:
+            temp = self.pos
+            self.pos += (self.pos - self.prev_pos) + Vector2.down() * g * dT * dT # velocity + gravity
+            self.prev_pos = temp
     
     def draw(self):
         if not self.locked: color = WHITE
