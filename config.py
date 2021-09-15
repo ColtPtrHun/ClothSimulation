@@ -7,6 +7,7 @@ WHITE = (255, 255, 255)
 DARK_BLUE = (0, 0, 127)
 
 dT = 1 / 60 # [FPS]
+ITERATIONS = 2
 g = 9.81
 SCREEN_SIZE = (1024, 768)
 SCREEN_SCALE = 40 # [pixel] = 1[m]

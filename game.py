@@ -30,7 +30,7 @@ def init():
 
     for y in range(rows):
         for x in range(columns):
-            if y == 0 and x % 2 == 0: # lock every second point in the first row
+            if x % 2 == 0: # lock every second point
                 Points.append(Point(offset + scale * x, offset + scale * y, True))
             else:
                 #Points.append(Point())
@@ -41,7 +41,7 @@ def init():
     Sticks = []
 
     for i in range(len(Points) - 1):
-        Sticks.append(Stick(Points[i], Points[i + 1], Vector2.distance(Points[i].pos, Points[i + 1].pos)))
+        Sticks.append(Stick(Points[i], Points[i + 1], .01 + Vector2.distance(Points[i].pos, Points[i + 1].pos)))
 
     global clock
     clock = pygame.time.Clock()
@@ -55,6 +55,10 @@ def loop():
     # Physics
     for p in Points:
         p.move()
+    
+    for i in range(ITERATIONS):
+        for s in Sticks:
+            s.tether()
 
     # Graphics
     display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
@@ -108,6 +112,14 @@ class Stick():
         end_pos = pygame.Vector2((self.p2.pos.x, self.p2.pos.y))
         pygame.draw.line(display_surface, WHITE, SCREEN_SCALE * start_pos, SCREEN_SCALE * end_pos, Stick.width)
 
+    def tether(self):
+        center = (self.p1.pos + self.p2.pos) * .5
+        dir = Vector2.normalized(self.p1.pos - self.p2.pos)
+
+        if not self.p1.locked:
+            self.p1.pos = center + dir * self.length / 2
+        if not self.p2.locked:
+            self.p2.pos = center - dir * self.length / 2
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     # Class (~static) variables
