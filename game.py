@@ -21,7 +21,7 @@ def init():
     display_surface = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption("Cloth simulation")
 
-    # Initialize points
+    # Points
     global Points
     Points = []
 
@@ -35,6 +35,13 @@ def init():
             else:
                 #Points.append(Point())
                 Points.append(Point(offset + scale * x, offset + scale * y))
+
+    # Sticks
+    global Sticks
+    Sticks = []
+
+    for i in range(len(Points) - 1):
+        Sticks.append(Stick(Points[i], Points[i + 1], Vector2.distance(Points[i].pos, Points[i + 1].pos)))
 
     global clock
     clock = pygame.time.Clock()
@@ -55,6 +62,9 @@ def loop():
     for p in Points:
         p.draw()
     
+    for s in Sticks:
+        s.draw()
+
     pygame.display.update()
 
     # Sleep
@@ -81,10 +91,23 @@ class Point():
         if not self.locked: color = WHITE
         else: color = RED
         
+        center = pygame.Vector2((self.pos.x, self.pos.y))
         pygame.draw.circle(display_surface,
                            color,
-                           (SCREEN_SCALE * self.pos.x, SCREEN_SCALE * self.pos.y),
+                           SCREEN_SCALE * center,
                            Point.radius)
+
+class Stick():
+    width = 2
+    def __init__(self, p1, p2, length):
+        self.p1, self.p2 = p1, p2
+        self.length = length
+    
+    def draw(self):
+        start_pos = pygame.Vector2((self.p1.pos.x, self.p1.pos.y))
+        end_pos = pygame.Vector2((self.p2.pos.x, self.p2.pos.y))
+        pygame.draw.line(display_surface, WHITE, SCREEN_SCALE * start_pos, SCREEN_SCALE * end_pos, Stick.width)
+
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     # Class (~static) variables
