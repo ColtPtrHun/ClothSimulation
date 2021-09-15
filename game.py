@@ -116,10 +116,11 @@ class Stick():
         center = (self.p1.pos + self.p2.pos) * .5
         dir = Vector2.normalized(self.p1.pos - self.p2.pos)
 
-        if not self.p1.locked:
-            self.p1.pos = center + dir * self.length / 2
-        if not self.p2.locked:
-            self.p2.pos = center - dir * self.length / 2
+        if Vector2.distance(self.p1.pos, self.p2.pos) > self.length:
+            if not self.p1.locked:
+                self.p1.pos = center + dir * self.length / 2
+            if not self.p2.locked:
+                self.p2.pos = center - dir * self.length / 2
 
 class Player(pygame.sprite.Sprite): # We passed a class as an argument. The Player class will be derived from the Sprite class!
     # Class (~static) variables
