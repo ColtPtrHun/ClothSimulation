@@ -7,8 +7,8 @@ from config import *
 from objects import Point, Stick, Points, Sticks
 
 States = {
-  0: "Pause",
-  1: "Play"
+  0: "PAUSE",
+  1: "PLAY"
 }
 
 def main():
@@ -22,7 +22,13 @@ def init():
     # Setup display
     global display_surface # Create a global variable. If it already exists, then this is only required if we want to change its value.
     display_surface = pygame.display.set_mode(SCREEN_SIZE)
+
+    # Texts
     pygame.display.set_caption("Cloth simulation")
+    global font
+    font = pygame.font.Font('freesansbold.ttf', FONT_SIZE)
+    #print(pygame.font.get_fonts())
+    #font = pygame.font.Font(print(pygame.font.match_font('couriernew')), FONT_SIZE)
 
     global state
     state = 0
@@ -81,11 +87,35 @@ def loop():
     
     for s in Sticks:
         s.draw(display_surface)
+    
+    draw_instructions(display_surface)
 
     pygame.display.update()
 
     # Sleep
     clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
+
+def draw_instructions(display_surface):
+    global line
+    line = 0
+
+    draw_text(display_surface, States[state])
+    if state == 0: # Pause
+        draw_text(display_surface, 'Place floating points using the \'Left Mouse Button\'.')
+        draw_text(display_surface, 'Place locked points using the \'Right Mouse Button\'.')
+        draw_text(display_surface, 'Hold and drag the \'Left Mouse Button\' from point A to point B to create a stick.')
+        draw_text(display_surface, 'Press \'Space\' to play!')
+    else: # Play
+        draw_text(display_surface, 'Hold and drag the \'Left Mouse Button\' to cut sticks.')
+        draw_text(display_surface, 'Press \'Space\' to pause.')
+
+def draw_text(display_surface, string):
+    global line
+    text = font.render(string, True, WHITE) # Text surface object
+    textRect = text.get_rect() # Rectangle
+    textRect.topleft = (FONT_OFFSET, FONT_OFFSET + line * FONT_SIZE)
+    display_surface.blit(text, textRect)
+    line += 1
 
 if __name__ == "__main__": # If this section exists, this will be the entry point
     main()
