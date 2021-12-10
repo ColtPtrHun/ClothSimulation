@@ -1,3 +1,5 @@
+__author__ = "Péter Kerekes"
+
 import numpy as np
 
 class Vector2:
