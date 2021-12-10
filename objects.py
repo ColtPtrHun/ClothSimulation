@@ -63,6 +63,19 @@ class Point():
                            color,
                            SCREEN_SCALE * pygame.Vector2((self.pos.x, self.pos.y)),
                            Point.radius)
+    
+    def is_on_position(self, screen_pos):
+        dist = Vector2.distance(self.pos, Vector2(screen_pos[0] / SCREEN_SCALE,
+                                                  screen_pos[1] / SCREEN_SCALE))
+        if dist < Point.radius / SCREEN_SCALE: return True
+        else: return False
+    
+    @staticmethod
+    def select_point(screen_pos):
+        for p in Points:
+            if p.is_on_position(screen_pos):
+                return p
+        return False
 
 class Stick():
     width = 2

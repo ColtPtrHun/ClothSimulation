@@ -37,7 +37,18 @@ def init():
     clock = pygame.time.Clock()
 
 def loop():
-    # Input
+    input()
+
+    if state == 1: # Play
+        physics()
+    
+    graphics()
+
+    # Sleep
+    clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
+
+def input():
+    global Points
     for event in pygame.event.get():
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
@@ -48,29 +59,42 @@ def loop():
                 else:
                     state = 0
                     print('Pause!')
+        
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # TEST
+            if event.button == 2: # Middle mouse button
+                pos = pygame.mouse.get_pos()
+                point = Point.select_point(pos)
+                if point: point.locked = False
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            global Points
             pos = pygame.mouse.get_pos()
 
-            if event.button == 1: # Left mouse button
-                Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False)
-                print('New floating point at (', pos[0], ', ', pos[1], ')')
-            elif event.button == 3: # Right mouse button
-                Points[5].destroy()
+            if state == 0: # Pause
+                if event.button == 1: # Left mouse button
+                    Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False)
+                    print('New floating point at (', pos[0], ', ', pos[1], ')')
+                elif event.button == 3: # Right mouse button
+                    Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, True)
+                    print('New locked point at (', pos[0], ', ', pos[1], ')')
+            else: # Play
+                pass
 
         elif event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-    # Physics
+def physics():
+    # Velocity, gravity
     for p in Points:
         p.move()
     
-    for i in range(ITERATIONS):
+    # Tethering
+    for i in range(TETHERING_ITERATIONS):
         for s in Sticks:
             s.tether()
     
+    # Check boundaries
     i = 0
     while i < len(Points):
         if Points[i].is_out_of_bounds():
@@ -79,9 +103,11 @@ def loop():
         else:
             i += 1
 
-    # Graphics
-    display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
+def graphics():
+    # Clear the screen first
+    display_surface.fill(SCREEN_BACKGROUND)
 
+    # Draw objects
     for p in Points:
         p.draw(display_surface)
     
@@ -91,9 +117,6 @@ def loop():
     draw_instructions(display_surface)
 
     pygame.display.update()
-
-    # Sleep
-    clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
 def draw_instructions(display_surface):
     global line
