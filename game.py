@@ -57,8 +57,7 @@ def loop():
                 Points.append(Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False))
                 print('New floating point at (', pos[0], ', ', pos[1], ')')
             elif event.button == 3: # Right mouse button
-                Points.append(Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, True))
-                print('New locked point at (', pos[0], ', ', pos[1], ')')
+                Points[5].destroy()
 
         if event.type == QUIT:
             pygame.quit()
@@ -71,6 +70,14 @@ def loop():
     for i in range(ITERATIONS):
         for s in Sticks:
             s.tether()
+    
+    i = 0
+    while i < len(Points):
+        if Points[i].is_out_of_bounds():
+            Points[i].destroy()
+            i = 0
+        else:
+            i += 1
 
     # Graphics
     display_surface.fill(SCREEN_BACKGROUND) # Clear the screen first
@@ -98,12 +105,33 @@ class Point():
             self.pos = self.prev_pos = Vector2(x, y)
         self.locked = locked
     
+    def destroy(self):
+        # Destroy every attached stick
+        i = 0
+        while i < len(Sticks):
+            if Sticks[i].p1 == self or Sticks[i].p2 == self:
+                Sticks[i].destroy()
+                i = 0
+            else:
+                i += 1
+
+        # Remove from list
+        print('Point destroyed at (', self.pos.x, ', ', self.pos.y, ')')
+        global Points
+        Points.remove(self)
+    
     def move(self):
         if not self.locked:
             temp = self.pos
             self.pos += (self.pos - self.prev_pos) + Vector2.down() * g * dT * dT # velocity + gravity
             self.prev_pos = temp
     
+    def is_out_of_bounds(self):
+        if self.pos.x < 0 or self.pos.x > Point.max_x or self.pos.y < 0 or self.pos.y > Point.max_y:
+            return True
+        else:
+            return False
+
     def draw(self):
         if not self.locked: color = WHITE
         else: color = RED
@@ -118,6 +146,11 @@ class Stick():
     def __init__(self, p1, p2, length):
         self.p1, self.p2 = p1, p2
         self.length = length
+    
+    def destroy(self):
+        # Remove from list
+        global Sticks
+        Sticks.remove(self)
     
     def draw(self):
         start_pos = pygame.Vector2((self.p1.pos.x, self.p1.pos.y))
