@@ -22,6 +22,7 @@ class Point():
                                                y=random.random() * Point.max_y)
         else:
             self.pos = self.prev_pos = Vector2(x, y)
+        
         self.locked = locked
 
         # Add to list
@@ -79,9 +80,13 @@ class Point():
 
 class Stick():
     width = 2
-    def __init__(self, p1, p2, length):
+    def __init__(self, p1, p2, length=None):
         self.p1, self.p2 = p1, p2
-        self.length = length
+
+        if length == None:
+            self.length = Vector2.distance(self.p1.pos, self.p2.pos)
+        else:
+            self.length = length
 
         # Add to list
         global Sticks

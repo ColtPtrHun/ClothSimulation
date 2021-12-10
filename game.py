@@ -11,6 +11,9 @@ States = {
   1: "PLAY"
 }
 
+global creatingStick # The first point of the stick being created.
+creatingStick = False
+
 def main():
     init()
     while True:
@@ -31,7 +34,7 @@ def init():
     #font = pygame.font.Font(print(pygame.font.match_font('couriernew')), FONT_SIZE)
 
     global state
-    state = 0
+    state = PAUSE
 
     global clock
     clock = pygame.time.Clock()
@@ -39,7 +42,7 @@ def init():
 def loop():
     input()
 
-    if state == 1: # Play
+    if state == PLAY:
         physics()
     
     graphics()
@@ -48,33 +51,45 @@ def loop():
     clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
 def input():
-    global Points
+    global Points, Sticks, creatingStick
+
     for event in pygame.event.get():
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 global state
-                if state == 0:
-                    state = 1
+                if state == PAUSE:
+                    state = PLAY
                     print('Play!')
                 else:
-                    state = 0
+                    state = PAUSE
                     print('Pause!')
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # TEST
-            if event.button == 2: # Middle mouse button
-                pos = pygame.mouse.get_pos()
-                point = Point.select_point(pos)
-                if point: point.locked = False
+            pos = pygame.mouse.get_pos()
+
+            if state == PAUSE:
+                if event.button == LEFT_MOUSE_BUTTON:
+                    creatingStick = Point.select_point(pos)
 
         elif event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
 
-            if state == 0: # Pause
-                if event.button == 1: # Left mouse button
-                    Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False)
-                    print('New floating point at (', pos[0], ', ', pos[1], ')')
-                elif event.button == 3: # Right mouse button
+            if state == PAUSE:
+                if event.button == LEFT_MOUSE_BUTTON:
+                    if creatingStick:
+                        point = Point.select_point(pos)
+
+                        if point and point != creatingStick: # We found a second point!
+                            Stick(creatingStick, point)
+                            print('New stick!')
+                        else:
+                            print('Cancel stick creation.')
+
+                        creatingStick = False
+                    else:
+                        Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False)
+                        print('New floating point at (', pos[0], ', ', pos[1], ')')
+                elif event.button == RIGHT_MOUSE_BUTTON:
                     Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, True)
                     print('New locked point at (', pos[0], ', ', pos[1], ')')
             else: # Play
@@ -123,7 +138,7 @@ def draw_instructions(display_surface):
     line = 0
 
     draw_text(display_surface, States[state])
-    if state == 0: # Pause
+    if state == PAUSE:
         draw_text(display_surface, 'Place floating points using the \'Left Mouse Button\'.')
         draw_text(display_surface, 'Place locked points using the \'Right Mouse Button\'.')
         draw_text(display_surface, 'Hold and drag the \'Left Mouse Button\' from point A to point B to create a stick.')
