@@ -82,6 +82,10 @@ def input():
                         point = Point.select_point(pos)
 
                         if point and point != creatingStick: # We found a second point!
+                            if Stick.compare(creatingStick, point):
+                                print('Stick already present. Cancelling.')
+                                return
+                            
                             Stick(creatingStick, point)
                             print('New stick!')
                         else:

@@ -81,7 +81,9 @@ class Point():
 class Stick():
     width = 2
     def __init__(self, p1, p2, length=None):
-        self.p1, self.p2 = p1, p2
+        # Ordering. Instances can be compared more easily.
+        if p2.pos.x < p1.pos.x: self.p1, self.p2 = p2, p1
+        else: self.p1, self.p2 = p1, p2
 
         if length == None:
             self.length = Vector2.distance(self.p1.pos, self.p2.pos)
@@ -111,3 +113,13 @@ class Stick():
                 self.p1.pos = center + dir * self.length / 2
             if not self.p2.locked:
                 self.p2.pos = center - dir * self.length / 2
+    
+    @staticmethod
+    def compare(p1, p2):
+        if p2.pos.x < p1.pos.x: p1, p2 = p2, p1 # Ordering
+
+        # Is there already a stick between the two points?
+        for s in Sticks:
+            if p1.pos == s.p1.pos and p2.pos == s.p2.pos:
+                return True
+        return False
