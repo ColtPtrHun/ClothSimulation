@@ -51,12 +51,18 @@ def loop():
     clock.tick(1 / dT) # Limiting the framerate. Computes the time passed between two calls.
 
 def input():
-    global Points, Sticks, creatingStick
+    global state, Points, Sticks, creatingStick
+    mousePos = pygame.mouse.get_pos()
+
+    if state == PLAY and pygame.mouse.get_pressed()[0]:
+        # Left Mouse Button is being held down.
+        print('LMB (', mousePos[0], ', ', mousePos[1], ')')
+        # <- Cut sticks
 
     for event in pygame.event.get():
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
-                global state, SCREEN_BACKGROUND
+                global SCREEN_BACKGROUND
                 if state == PAUSE:
                     state = PLAY
                     SCREEN_BACKGROUND = DARK_BLUE
@@ -66,40 +72,31 @@ def input():
                     SCREEN_BACKGROUND = DEEP_BLUE
                     print('Pause!')
         
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_MOUSE_BUTTON and state == PAUSE:
+            creatingStick = Point.select_point(mousePos)
 
-            if state == PAUSE:
-                if event.button == LEFT_MOUSE_BUTTON:
-                    creatingStick = Point.select_point(pos)
+        elif event.type == pygame.MOUSEBUTTONUP and state == PAUSE:
+            if event.button == LEFT_MOUSE_BUTTON:
+                if creatingStick:
+                    point = Point.select_point(mousePos)
 
-        elif event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-
-            if state == PAUSE:
-                if event.button == LEFT_MOUSE_BUTTON:
-                    if creatingStick:
-                        point = Point.select_point(pos)
-
-                        if point and point != creatingStick: # We found a second point!
-                            if Stick.compare(creatingStick, point):
-                                print('Stick already present. Cancelling.')
-                                return
-                            
-                            Stick(creatingStick, point)
-                            print('New stick!')
-                        else:
-                            print('Cancel stick creation.')
-
-                        creatingStick = False
+                    if point and point != creatingStick: # We found a second point!
+                        if Stick.compare(creatingStick, point):
+                            print('Stick already present. Cancelling.')
+                            return
+                        
+                        Stick(creatingStick, point)
+                        print('New stick!')
                     else:
-                        Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, False)
-                        print('New floating point at (', pos[0], ', ', pos[1], ')')
-                elif event.button == RIGHT_MOUSE_BUTTON:
-                    Point(pos[0] / SCREEN_SCALE, pos[1] / SCREEN_SCALE, True)
-                    print('New locked point at (', pos[0], ', ', pos[1], ')')
-            else: # Play
-                pass
+                        print('Cancel stick creation.')
+
+                    creatingStick = False
+                else:
+                    Point(mousePos[0] / SCREEN_SCALE, mousePos[1] / SCREEN_SCALE, False)
+                    print('New floating point at (', mousePos[0], ', ', mousePos[1], ')')
+            elif event.button == RIGHT_MOUSE_BUTTON:
+                Point(mousePos[0] / SCREEN_SCALE, mousePos[1] / SCREEN_SCALE, True)
+                print('New locked point at (', mousePos[0], ', ', mousePos[1], ')')
 
         elif event.type == QUIT:
             pygame.quit()
