@@ -56,12 +56,14 @@ def input():
     for event in pygame.event.get():
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
-                global state
+                global state, SCREEN_BACKGROUND
                 if state == PAUSE:
                     state = PLAY
+                    SCREEN_BACKGROUND = DARK_BLUE
                     print('Play!')
                 else:
                     state = PAUSE
+                    SCREEN_BACKGROUND = DEEP_BLUE
                     print('Pause!')
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
