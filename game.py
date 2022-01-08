@@ -4,6 +4,7 @@ import pygame, sys
 from pygame.locals import * # no "pygame.locals" prefix is needed
 
 from config import *
+from vector2 import Vector2
 from objects import Point, Stick, Points, Sticks
 
 States = {
@@ -56,8 +57,7 @@ def input():
 
     if state == PLAY and pygame.mouse.get_pressed()[0]:
         # Left Mouse Button is being held down.
-        print('LMB (', mousePos[0], ', ', mousePos[1], ')')
-        # <- Cut sticks
+        Stick.cut_stick(Vector2(mousePos[0], mousePos[1]))
 
     for event in pygame.event.get():
         if event.type == pygame.KEYUP:

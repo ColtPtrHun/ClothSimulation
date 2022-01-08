@@ -1,7 +1,8 @@
 __author__ = "Péter Kerekes"
 
-import pygame
 import random
+import numpy as np
+import pygame
 from pygame.locals import * # no "pygame.locals" prefix is needed
 
 from config import *
@@ -114,6 +115,29 @@ class Stick():
             if not self.p2.locked:
                 self.p2.pos = center - dir * self.length / 2
     
+    def is_on_position(self, screen_pos):
+        screen_pos /= SCREEN_SCALE
+
+        # Is it in the rectangle of the stick?
+        p1 = Vector2(min(self.p1.pos.x, self.p2.pos.x) - STICK_SELECT_TOLERANCE,
+                     min(self.p1.pos.y, self.p2.pos.y) - STICK_SELECT_TOLERANCE)
+        
+        p2 = Vector2(max(self.p1.pos.x, self.p2.pos.x) + STICK_SELECT_TOLERANCE,
+                     max(self.p1.pos.y, self.p2.pos.y) + STICK_SELECT_TOLERANCE)
+
+        if screen_pos.x < p1.x or screen_pos.x > p2.x or screen_pos.y < p1.y or screen_pos.y > p2.y:
+            return False
+        
+        # Is it on the stick?
+        dist = (abs((self.p2.pos.x - self.p1.pos.x) * (self.p1.pos.y - screen_pos.y)
+                    - (self.p1.pos.x - screen_pos.x) * (self.p2.pos.y - self.p1.pos.y))
+                / np.sqrt(np.square(self.p2.pos.x - self.p1.pos.x) + np.square(self.p2.pos.y - self.p1.pos.y)))
+        
+        if dist < STICK_SELECT_THRESHOLD:
+            return True
+
+        return False
+    
     @staticmethod
     def compare(p1, p2):
         if p2.pos.x < p1.pos.x: p1, p2 = p2, p1 # Ordering
@@ -123,3 +147,13 @@ class Stick():
             if p1.pos == s.p1.pos and p2.pos == s.p2.pos:
                 return True
         return False
+
+    @staticmethod
+    def cut_stick(screen_pos):
+        i = 0
+        while i < len(Sticks):
+            if Sticks[i].is_on_position(screen_pos):
+                Sticks[i].destroy()
+                i = 0
+            else:
+                i += 1
